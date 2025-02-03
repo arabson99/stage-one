@@ -80,14 +80,17 @@ async def classify_number(number: Optional[Any] = Query(None, description="Numbe
         properties.append("odd" if odd else "even")
         
         # Prepare the response
-        return {
+        return JSONResponse (
+            content={
             "number": number,
             "is_prime": prime,
             "is_perfect": perfect,
             "properties": properties,
             "digit_sum": digit_sum,
             "fun_fact": fun_fact
-        }
+        },
+        status_code=200
+        )
         
     except Exception as e:
         return  JSONResponse(
