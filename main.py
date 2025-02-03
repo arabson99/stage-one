@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Query, HTTPException
+from fastapi.responses import JSONResponse
 import httpx
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Any, Optional
@@ -58,10 +59,10 @@ async def classify_number(number: Optional[Any] = Query(None, description="Numbe
             number = int(number)
         except (ValueError, TypeError):
             # if conversion fails, return the required 400 Bad Request response
-            raise HTTPException(
-            status_code=400,
-            detail={"number": str(number), "error": True}
-        )
+            return  JSONResponse(
+                content={"number": str(number), "error": True },
+                status_code=400
+            )
     
         
         # Classify the number
@@ -89,10 +90,10 @@ async def classify_number(number: Optional[Any] = Query(None, description="Numbe
         }
         
     except Exception as e:
-        raise HTTPException(status_code=400, detail={
-                    "number": str(number),
-                    "error": True
-                })
+        return  JSONResponse(
+                content={"number": str(number), "error": True },
+                status_code=400
+            )
     
 if __name__ == "__main__":
     import uvicorn
