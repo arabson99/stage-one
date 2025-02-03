@@ -58,10 +58,10 @@ async def classify_number(number: Optional[Any] = Query(None, description="Numbe
             number = int(number)
         except (ValueError, TypeError):
             # if conversion fails, return the required 400 Bad Request response
-            return {
-                    "number": str(number),
-                    "error": True
-                }
+            raise HTTPException(
+            status_code=400,
+            detail={"number": str(number), "error": True}
+        )
     
         
         # Classify the number
