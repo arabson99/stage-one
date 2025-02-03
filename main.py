@@ -38,11 +38,12 @@ def is_armstrong(n: int) -> bool:
 
 def get_fun_fact(n: int) -> str:
     """Get a fun fact about a number from Numbers API or return a custom fact for Armstrong numbers."""
-    if is_armstrong(n):
+    '''if is_armstrong(n):
         digits = [int(d) for d in str(n)]
         power = len(digits)
         sum_of_powers = " + ".join([f"{d}^{power}" for d in digits])
         return f"{n} is an Armstrong number because {sum_of_powers} = {n}"
+    '''
     
     try:
         response = requests.get(f"http://numbersapi.com/{n}/math")
