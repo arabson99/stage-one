@@ -44,11 +44,11 @@ def get_fun_fact(n: int) -> str:
         sum_of_powers = " + ".join([f"{d}^{power}" for d in digits])
         return f"{n} is an Armstrong number because {sum_of_powers} = {n}"
     
-    response = requests.get(f"http://numbersapi.com/{n}/math")
     try:
+        response = requests.get(f"http://numbersapi.com/{n}/math")
         return response.text if response.status_code == 200 else "No fun fact found."
     except Exception as e:
-        return str(e)
+        return f"Error fetching fun fact: {str(e)}"
     
 @app.get("/api/classify-number")
 async def classify_number(number: Any = Query(..., description="Number to classify")):
