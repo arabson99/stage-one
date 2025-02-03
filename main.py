@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Query, HTTPException
 import requests
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Any
+from typing import Any, Optional
 
 app = FastAPI()
 
@@ -52,7 +52,7 @@ def get_fun_fact(n: int) -> str:
         return f"Error fetching fun fact: {str(e)}"
     
 @app.get("/api/classify-number")
-async def classify_number(number: Any = Query(..., description="Number to classify")):
+async def classify_number(number: Optional[Any] = Query(None, description="Number to classify")):
     """Classify a number and return its properties in JSON format."""
     try:
         # Check if the input is a valid integer
