@@ -70,7 +70,7 @@ async def classify_number(number: Optional[Any] = Query(None, description="Numbe
         perfect = is_perfect(number)
         armstrong = is_armstrong(number)
         odd = number % 2 != 0
-        digit_sum = sum(int(d) for d in str(number))
+        digit_sum = sum(int(d) for d in str(abs(number)))
         fun_fact = await get_fun_fact(number)
         
         # Prepare the properties list
