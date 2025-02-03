@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 import httpx
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Any, Optional
+import asyncio
 
 app = FastAPI()
 
@@ -41,7 +42,7 @@ async def get_fun_fact(n: int) -> str:
     """Fetch a fun fact asynchronously to avoid slow responses."""
     url = f"http://numbersapi.com/{n}/math"
     try:
-        async with httpx.AsyncClient(timeout=2.0) as client:
+        async with httpx.AsyncClient(timeout=1.5) as client:
             response = await client.get(url)
             response.raise_for_status()  # Raise an error for HTTP error responses
             return response.text
@@ -71,7 +72,9 @@ async def classify_number(number: Optional[Any] = Query(None, description="Numbe
         armstrong = is_armstrong(number)
         odd = number % 2 != 0
         digit_sum = sum(int(d) for d in str(abs(number)))
-        fun_fact = await get_fun_fact(number)
+        
+        # Fetch the fun fact asynchronously
+        fun_fact = asyncio.create_task(get_fun_fact(number))
         
         # Prepare the properties list
         properties = []
@@ -79,18 +82,21 @@ async def classify_number(number: Optional[Any] = Query(None, description="Numbe
             properties.append("armstrong")
         properties.append("odd" if odd else "even")
         
-        # Prepare the response
-        return JSONResponse (
-            content={
+        # Immediately await the fun fact to avoid blocking the response
+        response_data={
             "number": number,
             "is_prime": prime,
             "is_perfect": perfect,
             "properties": properties,
             "digit_sum": digit_sum,
-            "fun_fact": fun_fact
-        },
-        status_code=200
-        )
+        }
+        
+        # Await the fun fact before the final response
+        response_data["fun_fact"] = await fun_fact
+        
+        return JSONResponse(content=response_data, status_code=200)
+        
+        
         
     except Exception as e:
         return  JSONResponse(
