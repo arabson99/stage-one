@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Query, HTTPException
-import requests
+import httpx
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Any, Optional
 
@@ -36,20 +36,15 @@ def is_armstrong(n: int) -> bool:
     return sum(d ** power for d in digits) == n
 
 
-def get_fun_fact(n: int) -> str:
-    """Get a fun fact about a number from Numbers API or return a custom fact for Armstrong numbers."""
-    '''if is_armstrong(n):
-        digits = [int(d) for d in str(n)]
-        power = len(digits)
-        sum_of_powers = " + ".join([f"{d}^{power}" for d in digits])
-        return f"{n} is an Armstrong number because {sum_of_powers} = {n}"
-    '''
-    
+async def get_fun_fact(n: int) -> str:
+    """Fetch a fun fact asynchronously to avoid slow responses."""
+    url = f"http://numbersapi.com/{n}/math"
     try:
-        response = requests.get(f"http://numbersapi.com/{n}/math")
-        return response.text if response.status_code == 200 else "No fun fact found."
-    except Exception as e:
-        return f"Error fetching fun fact: {str(e)}"
+        async with httpx.AsyncClient(timeout=2.0) as client:  # Set timeout to avoid long waits
+            response = await client.get(url)
+            return response.text if response.status_code == 200 else "No fun fact found."
+    except httpx.RequestError:
+        return "No fun fact found."
     
 @app.get("/api/classify-number")
 async def classify_number(number: Optional[Any] = Query(None, description="Number to classify")):
@@ -60,14 +55,11 @@ async def classify_number(number: Optional[Any] = Query(None, description="Numbe
             number = int(number)
         except (ValueError, TypeError):
             # if conversion fails, return the required 400 Bad Request response
-            raise HTTPException(
-                status_code=400,
-                detail={
+            return {
                     "number": str(number),
                     "error": True
                 }
-            )
-       
+    
         
         # Classify the number
         prime = is_prime(number)
@@ -75,7 +67,7 @@ async def classify_number(number: Optional[Any] = Query(None, description="Numbe
         armstrong = is_armstrong(number)
         odd = number % 2 != 0
         digit_sum = sum(int(d) for d in str(number))
-        fun_fact = get_fun_fact(number)
+        fun_fact = await get_fun_fact(number)
         
         # Prepare the properties list
         properties = []
