@@ -33,6 +33,8 @@ def is_perfect(n: int) -> bool:
 
 def is_armstrong(n: int) -> bool:
     """Check if a number is Armstrong number."""
+    if n < 0:
+        return False
     digits = [int(d) for d in str(n)]
     power = len(digits)
     return sum(d ** power for d in digits) == n
