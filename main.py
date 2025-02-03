@@ -40,11 +40,14 @@ async def get_fun_fact(n: int) -> str:
     """Fetch a fun fact asynchronously to avoid slow responses."""
     url = f"http://numbersapi.com/{n}/math"
     try:
-        async with httpx.AsyncClient(timeout=2.0) as client:  # Set timeout to avoid long waits
+        async with httpx.AsyncClient(timeout=2.0) as client:
             response = await client.get(url)
-            return response.text if response.status_code == 200 else "No fun fact found."
+            response.raise_for_status()  # Raise an error for HTTP error responses
+            return response.text
+    except httpx.HTTPStatusError:
+        return "Error: Unable to fetch fun fact (invalid response from API)."
     except httpx.RequestError:
-        return "No fun fact found."
+        return "Error: Could not reach the Numbers API."
     
 @app.get("/api/classify-number")
 async def classify_number(number: Optional[Any] = Query(None, description="Number to classify")):
