@@ -94,7 +94,10 @@ async def classify_number(number: Any = Query(..., description="Number to classi
         }
         
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail={
+                    "number": str(number),
+                    "error": True
+                })
     
 if __name__ == "__main__":
     import uvicorn
